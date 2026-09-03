@@ -58,27 +58,25 @@ public static class AuthenticationExtensions
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer();
 
-        // Resolve JWT settings when bearer options are built so validation uses
-        // the same IOptions<JwtOptions> binding as TokenService (including test
-        // overrides from WebApplicationFactory).
-        services.AddSingleton<
-            IConfigureNamedOptions<JwtBearerOptions>,
-            ConfigureJwtBearerOptions>();
+        // Apply validation parameters after the framework's JwtBearer configurators
+        // so TokenService and JwtBearer always read the same bound JwtOptions,
+        // including overrides added by WebApplicationFactory in integration tests.
+        services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
 
         return services;
     }
 
-    private sealed class ConfigureJwtBearerOptions(IOptions<JwtOptions> jwtOptions)
-        : IConfigureNamedOptions<JwtBearerOptions>
+    private sealed class ConfigureJwtBearerOptions(IOptionsMonitor<JwtOptions> jwtOptions)
+        : IPostConfigureOptions<JwtBearerOptions>
     {
-        public void Configure(string? name, JwtBearerOptions options)
+        public void PostConfigure(string? name, JwtBearerOptions options)
         {
             if (!string.Equals(name, JwtBearerDefaults.AuthenticationScheme, StringComparison.Ordinal))
             {
                 return;
             }
 
-            var jwt = jwtOptions.Value;
+            var jwt = jwtOptions.CurrentValue;
 
             options.MapInboundClaims = false;
             options.TokenValidationParameters = new TokenValidationParameters
@@ -95,9 +93,6 @@ public static class AuthenticationExtensions
                 RoleClaimType = ClaimTypes.Role
             };
         }
-
-        public void Configure(JwtBearerOptions options) =>
-            Configure(JwtBearerDefaults.AuthenticationScheme, options);
     }
 
     /// <summary>Registers the policies used by the <c>[Authorize]</c> attributes.</summary>

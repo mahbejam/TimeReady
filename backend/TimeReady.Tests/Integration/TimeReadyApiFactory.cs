@@ -58,7 +58,9 @@ public class TimeReadyApiFactory : WebApplicationFactory<Program>
         // logger so a previous fixture does not leave it in a frozen state.
         Log.CloseAndFlush();
 
-        builder.UseEnvironment("Development");
+        // Production skips appsettings.Development.json, whose signing key would
+        // otherwise disagree with the integration-test key injected below.
+        builder.UseEnvironment("Production");
 
         builder.ConfigureAppConfiguration((_, configuration) =>
         {
