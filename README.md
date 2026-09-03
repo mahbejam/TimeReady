@@ -24,6 +24,12 @@ The application stores the facts that matter for vacation preparation (time bala
 | **Audience** | HR operators and administrators — not a self-service employee portal |
 | **Repository** | [github.com/mahbejam/TimeReady](https://github.com/mahbejam/TimeReady) |
 
+### Live portfolio demo
+
+Try the interactive [TimeReady portfolio demo](https://mahbejam.github.io/TimeReady/). It is a static GitHub Pages experience with simulated sample data, working time tracking, filters, and browser-local persistence — it is not connected to a live backend.
+
+This repository still contains the real full-stack application: the ASP.NET Core API, Angular frontend, PostgreSQL integration, automated tests, and Docker Compose setup. The GitHub Pages site is an isolated demonstration of the product experience in `docs/index.html` and does not replace or modify those application layers.
+
 ---
 
 ## ✨ Features
