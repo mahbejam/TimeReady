@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using TimeReady.Api.Authorization;
@@ -53,32 +54,50 @@ public static class AuthenticationExtensions
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var jwt = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>() ?? new JwtOptions();
-
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                // Keep the claim names that were written into the token instead of
-                // letting the handler rename them to WS-Federation URIs.
-                options.MapInboundClaims = false;
+            .AddJwtBearer();
 
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = jwt.Issuer,
-                    ValidateAudience = true,
-                    ValidAudience = jwt.Audience,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SigningKey)),
-                    ClockSkew = TimeSpan.FromSeconds(30),
-                    NameClaimType = JwtRegisteredClaimNames.Name,
-                    RoleClaimType = ClaimTypes.Role
-                };
-            });
+        // Resolve JWT settings when bearer options are built so validation uses
+        // the same IOptions<JwtOptions> binding as TokenService (including test
+        // overrides from WebApplicationFactory).
+        services.AddSingleton<
+            IConfigureNamedOptions<JwtBearerOptions>,
+            ConfigureJwtBearerOptions>();
 
         return services;
+    }
+
+    private sealed class ConfigureJwtBearerOptions(IOptions<JwtOptions> jwtOptions)
+        : IConfigureNamedOptions<JwtBearerOptions>
+    {
+        public void Configure(string? name, JwtBearerOptions options)
+        {
+            if (!string.Equals(name, JwtBearerDefaults.AuthenticationScheme, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            var jwt = jwtOptions.Value;
+
+            options.MapInboundClaims = false;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidIssuer = jwt.Issuer,
+                ValidateAudience = true,
+                ValidAudience = jwt.Audience,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SigningKey)),
+                ClockSkew = TimeSpan.FromSeconds(30),
+                NameClaimType = JwtRegisteredClaimNames.Name,
+                RoleClaimType = ClaimTypes.Role
+            };
+        }
+
+        public void Configure(JwtBearerOptions options) =>
+            Configure(JwtBearerDefaults.AuthenticationScheme, options);
     }
 
     /// <summary>Registers the policies used by the <c>[Authorize]</c> attributes.</summary>

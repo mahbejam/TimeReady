@@ -52,6 +52,7 @@ jobs:
         env:
           # The integration tests create a throwaway database per test class.
           TIMEREADY_TEST_DB: Host=localhost;Port=5432;Username=timeready;Password=timeready
+          Jwt__SigningKey: integration-test-signing-key-not-a-secret-0123456789
         run: dotnet test --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
 
       - name: Upload test results
