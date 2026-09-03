@@ -1,0 +1,36 @@
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.page-header__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--tr-ink);
+}
+
+.page-header__subtitle {
+  margin: 0.25rem 0 0;
+  color: var(--tr-muted);
+  font-size: 0.92rem;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.audit-table {
+  width: 100%;
+  min-width: 42rem;
+  background: transparent;
+}
+
+.audit-table__changes {
+  color: var(--tr-muted);
+  font-size: 0.88rem;
+}

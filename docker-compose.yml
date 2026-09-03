@@ -1,0 +1,64 @@
+# Base stack. On its own this is the production shape: no published database or
+# API ports, no Swagger, and every secret supplied from the environment.
+# `docker compose up` also picks up docker-compose.override.yml, which turns this
+# into a development stack.
+name: timeready
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-timeready}
+      POSTGRES_USER: ${POSTGRES_USER:-timeready}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-timeready}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-timeready} -d ${POSTGRES_DB:-timeready}"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: TimeReady.Api/Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__TimeReadyDb: >-
+        Host=db;Port=5432;Database=${POSTGRES_DB:-timeready};Username=${POSTGRES_USER:-timeready};Password=${POSTGRES_PASSWORD:-timeready}
+      Jwt__SigningKey: ${JWT_SIGNING_KEY:-}
+      IdentitySeed__Admin__Email: ${ADMIN_EMAIL:-admin@timeready.local}
+      IdentitySeed__Admin__Password: ${ADMIN_PASSWORD:-}
+      Cors__AllowedOrigins__0: ${FRONTEND_ORIGIN:-http://localhost:4200}
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${WEB_PORT:-4200}:8080"
+    healthcheck:
+      # 127.0.0.1 avoids IPv6 localhost, which refuses the connection in this image.
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  postgres-data:

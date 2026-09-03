@@ -1,0 +1,101 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit employee' : 'Add employee' }}</h2>
+
+@if (saving()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Saving" />
+}
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="form" (ngSubmit)="save()">
+    <mat-form-field appearance="outline" class="form__field form__field--wide">
+      <mat-label>Full name</mat-label>
+      <input matInput formControlName="fullName" autocomplete="off" maxlength="120" />
+      @if (form.controls.fullName.hasError('required')) {
+        <mat-error>Enter the employee's full name.</mat-error>
+      } @else if (form.controls.fullName.hasError('maxlength')) {
+        <mat-error>Use 120 characters or fewer.</mat-error>
+      } @else if (form.controls.fullName.hasError('server')) {
+        <mat-error>{{ form.controls.fullName.getError('server') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form__field">
+      <mat-label>Time balance</mat-label>
+      <input matInput type="number" step="0.25" formControlName="timeBalanceHours" />
+      <span matTextSuffix>hours</span>
+      <mat-hint>Negative means hours are owed.</mat-hint>
+      @if (form.controls.timeBalanceHours.hasError('required')) {
+        <mat-error>Enter the current time balance.</mat-error>
+      } @else if (form.controls.timeBalanceHours.hasError('min') || form.controls.timeBalanceHours.hasError('max')) {
+        <mat-error>Use a value between -200 and 400 hours.</mat-error>
+      } @else if (form.controls.timeBalanceHours.hasError('server')) {
+        <mat-error>{{ form.controls.timeBalanceHours.getError('server') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form__field">
+      <mat-label>Remaining vacation days</mat-label>
+      <input matInput type="number" step="1" formControlName="remainingVacationDays" />
+      @if (form.controls.remainingVacationDays.hasError('required')) {
+        <mat-error>Enter the remaining vacation days.</mat-error>
+      } @else if (form.controls.remainingVacationDays.hasError('min') || form.controls.remainingVacationDays.hasError('max')) {
+        <mat-error>Use a value between 0 and 60 days.</mat-error>
+      } @else if (form.controls.remainingVacationDays.hasError('server')) {
+        <mat-error>{{ form.controls.remainingVacationDays.getError('server') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="form__field form__field--wide">
+      <mat-label>Vacation start</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="vacationStartDate" />
+      <mat-datepicker-toggle matIconSuffix [for]="picker" />
+      <mat-datepicker #picker />
+      <mat-hint>Leave empty when no vacation is planned.</mat-hint>
+      @if (form.controls.vacationStartDate.hasError('server')) {
+        <mat-error>{{ form.controls.vacationStartDate.getError('server') }}</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="form__toggles">
+      <mat-checkbox formControlName="managerInformed">Manager informed</mat-checkbox>
+      <mat-checkbox formControlName="handoverCompleted">Handover completed</mat-checkbox>
+    </div>
+  </form>
+
+  @if (preview(); as result) {
+    <section class="preview" aria-live="polite">
+      <header class="preview__header">
+        <span class="preview__title">Readiness preview</span>
+        <tr-status-badge [label]="result.status" [tone]="result.isReady ? 'ready' : 'not-ready'" />
+      </header>
+
+      @if (result.warnings.length === 0) {
+        <p class="preview__empty">Nothing is open. This employee is ready to leave.</p>
+      } @else {
+        <ul class="preview__list">
+          @for (warning of result.warnings; track warning.code) {
+            <li class="preview__item">
+              <tr-status-badge
+                [label]="warning.severity"
+                [tone]="warning.severity === 'Critical' ? 'critical' : warning.severity === 'Warning' ? 'warning' : 'info'" />
+              <span>{{ warning.message }}</span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+
+  @if (errorMessage(); as message) {
+    <p class="form__error" role="alert">
+      <mat-icon aria-hidden="true">error_outline</mat-icon>
+      <span>{{ message }}</span>
+    </p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button matButton type="button" (click)="cancel()" [disabled]="saving()">Cancel</button>
+  <button matButton="filled" type="button" (click)="save()" [disabled]="saving()">
+    {{ isEdit ? 'Save changes' : 'Add employee' }}
+  </button>
+</mat-dialog-actions>

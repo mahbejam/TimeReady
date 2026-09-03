@@ -1,0 +1,79 @@
+<header class="page-header">
+  <div>
+    <h1 class="page-header__title">Notifications</h1>
+    <p class="page-header__subtitle">
+      {{ counts().critical }} blocking · {{ counts().warning }} warnings · {{ counts().info }} notes
+    </p>
+  </div>
+
+  <button
+    matButton="outlined"
+    type="button"
+    (click)="refresh()"
+    [disabled]="store.loading()"
+    [attr.aria-busy]="store.loading()">
+    @if (store.loading() && store.loaded()) {
+      <mat-spinner diameter="18" aria-hidden="true" />
+      Updating…
+    } @else {
+      <mat-icon aria-hidden="true">refresh</mat-icon>
+      Refresh
+    }
+  </button>
+</header>
+
+@if (store.loading() && store.loaded()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Updating findings" />
+}
+
+<mat-chip-listbox
+  class="filters"
+  aria-label="Filter by severity"
+  hideSingleSelectionIndicator
+  [value]="activeFilter()"
+  (change)="onFilterChange($event)">
+  @for (filter of filters; track filter) {
+    <mat-chip-option [value]="filter">{{ filter }}</mat-chip-option>
+  }
+</mat-chip-listbox>
+
+<tr-data-state
+  [loading]="store.loading() && !store.loaded()"
+  [error]="store.error()"
+  [empty]="store.loaded() && groups().length === 0"
+  loadingText="Checking the team…"
+  [emptyText]="activeFilter() === 'All'
+    ? 'Nothing is open. Everyone with a planned vacation is prepared.'
+    : 'No findings with this severity.'"
+  (retry)="refresh()">
+
+  <div class="cards">
+    @for (group of groups(); track group.row.id) {
+      <mat-card appearance="outlined" class="card" [class.card--blocked]="group.row.criticalCount > 0">
+        <mat-card-content>
+          <header class="card__header">
+            <div>
+              <h2 class="card__name">{{ group.row.fullName }}</h2>
+              <p class="card__meta">{{ group.row.vacationStartDate | vacationDate }}</p>
+            </div>
+            <tr-status-badge
+              [label]="group.row.status"
+              [tone]="group.row.isReady ? 'ready' : 'not-ready'" />
+          </header>
+
+          <ul class="findings">
+            @for (warning of group.warnings; track warning.code) {
+              <li class="finding">
+                <tr-status-badge [label]="warning.severity" [tone]="toneFor(warning.severity)" />
+                <div class="finding__body">
+                  <p class="finding__message">{{ warning.message }}</p>
+                  <p class="finding__recommendation">{{ warning.recommendation }}</p>
+                </div>
+              </li>
+            }
+          </ul>
+        </mat-card-content>
+      </mat-card>
+    }
+  </div>
+</tr-data-state>

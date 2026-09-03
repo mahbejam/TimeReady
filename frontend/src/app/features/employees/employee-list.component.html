@@ -1,0 +1,113 @@
+<header class="page-header">
+  <div>
+    <h1 class="page-header__title">Employees</h1>
+    <p class="page-header__subtitle">Time balances, planned absences and preparation status.</p>
+  </div>
+
+  @if (canManage()) {
+    <button matButton="filled" type="button" (click)="openCreateDialog()">
+      <mat-icon aria-hidden="true">add</mat-icon>
+      Add employee
+    </button>
+  }
+</header>
+
+<mat-card appearance="outlined">
+  <mat-card-content>
+    <mat-form-field appearance="outline" class="search" subscriptSizing="dynamic">
+      <mat-label>Search by name</mat-label>
+      <input matInput type="search" [value]="filter()" (input)="onFilterInput($any($event.target).value)" />
+      <mat-icon matIconSuffix aria-hidden="true">search</mat-icon>
+    </mat-form-field>
+
+    <tr-data-state
+      [loading]="store.loading() && !store.loaded()"
+      [error]="store.error()"
+      [empty]="store.loaded() && filteredRows().length === 0"
+      loadingText="Loading employees…"
+      [emptyText]="filter() ? 'No employee matches that name.' : 'No employees yet. Add the first one to start checking readiness.'"
+      (retry)="store.load()">
+
+      @if (store.loading() && store.loaded()) {
+        <mat-progress-bar mode="indeterminate" aria-label="Updating employees" class="refresh-bar" />
+      }
+
+      <div class="table-scroll">
+        <table mat-table [dataSource]="filteredRows()" class="employee-table">
+
+          <ng-container matColumnDef="fullName">
+            <th mat-header-cell *matHeaderCellDef>Employee</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="employee-table__name">{{ row.fullName }}</span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="timeBalanceHours">
+            <th mat-header-cell *matHeaderCellDef class="is-numeric">Time balance</th>
+            <td mat-cell *matCellDef="let row" class="is-numeric">
+              <span [class.is-negative]="row.timeBalanceHours < 0">
+                {{ row.timeBalanceHours > 0 ? '+' : '' }}{{ row.timeBalanceHours | number: '1.0-2' }} h
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="remainingVacationDays">
+            <th mat-header-cell *matHeaderCellDef class="is-numeric">Days left</th>
+            <td mat-cell *matCellDef="let row" class="is-numeric">{{ row.remainingVacationDays }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="vacationStartDate">
+            <th mat-header-cell *matHeaderCellDef>Vacation start</th>
+            <td mat-cell *matCellDef="let row">{{ row.vacationStartDate | vacationDate }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="preparation">
+            <th mat-header-cell *matHeaderCellDef>Preparation</th>
+            <td mat-cell *matCellDef="let row">
+              <span class="flags">
+                <span class="flag" [class.flag--done]="row.managerInformed">
+                  <mat-icon aria-hidden="true">{{ row.managerInformed ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                  Manager
+                </span>
+                <span class="flag" [class.flag--done]="row.handoverCompleted">
+                  <mat-icon aria-hidden="true">{{ row.handoverCompleted ? 'check_circle' : 'radio_button_unchecked' }}</mat-icon>
+                  Handover
+                </span>
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef>Status</th>
+            <td mat-cell *matCellDef="let row">
+              <tr-status-badge [label]="row.status" [tone]="row.isReady ? 'ready' : 'not-ready'" />
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="is-actions">Actions</th>
+            <td mat-cell *matCellDef="let row" class="is-actions">
+              <button matIconButton type="button" matTooltip="Edit" [attr.aria-label]="'Edit ' + row.fullName"
+                      (click)="openEditDialog(row)">
+                <mat-icon>edit</mat-icon>
+              </button>
+              @if (canManage()) {
+                <button matIconButton type="button" matTooltip="Delete"
+                        [attr.aria-label]="'Delete ' + row.fullName" (click)="delete(row)">
+                  <mat-icon>delete_outline</mat-icon>
+                </button>
+              }
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="columns"></tr>
+          <tr mat-row *matRowDef="let row; columns: columns" [class.is-blocked]="row.criticalCount > 0"></tr>
+        </table>
+      </div>
+
+      @if (canManage()) {
+        <button emptyAction matButton="outlined" type="button" (click)="openCreateDialog()">Add employee</button>
+      }
+    </tr-data-state>
+  </mat-card-content>
+</mat-card>

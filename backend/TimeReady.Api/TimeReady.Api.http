@@ -1,0 +1,148 @@
+@host = http://localhost:5080
+
+### List all employees
+GET {{host}}/api/employees
+
+### Get one employee
+GET {{host}}/api/employees/1
+
+### Create an employee
+POST {{host}}/api/employees
+Content-Type: application/json
+
+{
+  "fullName": "Julia Steiner",
+  "timeBalanceHours": -12.5,
+  "remainingVacationDays": 9,
+  "vacationStartDate": "2026-08-10",
+  "managerInformed": false,
+  "handoverCompleted": false
+}
+
+### Update an employee
+PUT {{host}}/api/employees/1
+Content-Type: application/json
+
+{
+  "fullName": "Anna Gruber",
+  "timeBalanceHours": 12.5,
+  "remainingVacationDays": 18,
+  "vacationStartDate": "2026-08-01",
+  "managerInformed": true,
+  "handoverCompleted": true
+}
+
+### Delete an employee
+DELETE {{host}}/api/employees/6
+
+### Readiness for all employees
+GET {{host}}/api/readiness
+
+### Readiness for one employee
+GET {{host}}/api/readiness/2
+
+### Preview readiness for unsaved data
+POST {{host}}/api/readiness/evaluate
+Content-Type: application/json
+
+{
+  "fullName": "Preview",
+  "timeBalanceHours": -30,
+  "remainingVacationDays": 4,
+  "vacationStartDate": "2026-07-28",
+  "managerInformed": false,
+  "handoverCompleted": false
+}
+
+### Health (overall)
+GET {{host}}/health
+
+### Health (liveness)
+GET {{host}}/health/live
+
+### Health (readiness, touches the database)
+GET {{host}}/health/ready
+
+### Explicit API version (the default is 1.0)
+GET {{host}}/api/employees
+X-Api-Version: 1.0
+
+### ---------------------------------------------------------------
+### Authentication. Run the login request first, then paste the
+### accessToken from the response into @token below.
+### ---------------------------------------------------------------
+@token = paste-the-access-token-here
+
+### Sign in
+POST {{host}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@timeready.local",
+  "password": "Admin#Demo2026"
+}
+
+### Current account
+GET {{host}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### Refresh the token pair
+POST {{host}}/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "paste-the-refresh-token-here"
+}
+
+### Sign out (revokes the refresh token)
+POST {{host}}/api/auth/logout
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "refreshToken": "paste-the-refresh-token-here"
+}
+
+### Any employee request now needs the header
+GET {{host}}/api/employees
+Authorization: Bearer {{token}}
+
+### ---------------------------------------------------------------
+### Audit trail (Admin only)
+### ---------------------------------------------------------------
+
+### Latest changes
+GET {{host}}/api/audit?page=1&pageSize=25
+Authorization: Bearer {{token}}
+
+### Only updates, made by a given user, in a date range
+GET {{host}}/api/audit?action=Updated&user=admin@timeready.local&from=2026-07-01T00:00:00Z
+Authorization: Bearer {{token}}
+
+### Change history of one employee
+GET {{host}}/api/audit/employees/1
+Authorization: Bearer {{token}}
+
+### A single audit entry
+GET {{host}}/api/audit/1
+Authorization: Bearer {{token}}
+
+### ---------------------------------------------------------------
+### Audit retention and archive (Admin only)
+### ---------------------------------------------------------------
+
+### Policy, job status and table sizes
+GET {{host}}/api/audit/retention
+Authorization: Bearer {{token}}
+
+### Apply the policy now instead of waiting for the next tick
+POST {{host}}/api/audit/retention/run
+Authorization: Bearer {{token}}
+
+### Search the archive
+GET {{host}}/api/audit/archive?page=1&pageSize=25
+Authorization: Bearer {{token}}
+
+### Archived changes of one employee
+GET {{host}}/api/audit/archive?entityName=Employee&entityId=1
+Authorization: Bearer {{token}}

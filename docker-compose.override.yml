@@ -1,0 +1,24 @@
+# Development overrides. Compose merges this on top of docker-compose.yml
+# automatically, so `docker compose up --build` gives a working stack with
+# Swagger, demo accounts and a reachable database — no .env file needed.
+#
+# For the production shape, ignore this file and provide secrets via .env:
+#   cp .env.example .env
+#   docker compose -f docker-compose.yml up --build
+services:
+  db:
+    ports:
+      # Exposed so `dotnet test` and a database client can reach it.
+      - "5432:5432"
+
+  api:
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      # Development-only values. Anything real must come from the environment.
+      Jwt__SigningKey: development-only-signing-key-change-me-32+chars
+      IdentitySeed__Admin__Password: Admin#Demo2026
+      IdentitySeed__Operator__Password: Operator#Demo2026
+      AuditRetention__InitialDelaySeconds: "15"
+    ports:
+      # Swagger UI on http://localhost:5080/swagger
+      - "5080:8080"

@@ -1,0 +1,101 @@
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.page-header button mat-spinner {
+  display: inline-block;
+  margin-right: 0.35rem;
+}
+
+.page-header + mat-progress-bar {
+  margin: -0.25rem 0 1rem;
+}
+
+.page-header__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1c1f24;
+}
+
+.page-header__subtitle {
+  margin: 0.25rem 0 0;
+  color: #5b6470;
+  font-size: 0.92rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.filters {
+  margin-bottom: 1.25rem;
+}
+
+.cards {
+  display: grid;
+  gap: 1rem;
+}
+
+.card--blocked {
+  border-left: 3px solid var(--tr-critical);
+}
+
+.card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.card__name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1c1f24;
+}
+
+.card__meta {
+  margin: 0.15rem 0 0;
+  font-size: 0.85rem;
+  color: #5b6470;
+}
+
+.findings {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.85rem;
+}
+
+.finding {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.finding__body {
+  min-width: 0;
+}
+
+.finding__message {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #1c1f24;
+}
+
+.finding__recommendation {
+  margin: 0.15rem 0 0;
+  font-size: 0.88rem;
+  color: #5b6470;
+}
+
+@media (max-width: 599px) {
+  .finding {
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+}

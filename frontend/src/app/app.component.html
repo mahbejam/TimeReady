@@ -1,0 +1,63 @@
+@if (auth.isAuthenticated()) {
+  <a class="skip-link" href="#main-content">Skip to content</a>
+
+  <mat-toolbar class="app-bar">
+    <a class="app-bar__brand" routerLink="/dashboard">
+      <mat-icon aria-hidden="true">schedule</mat-icon>
+      <span>TimeReady</span>
+    </a>
+
+    <nav class="app-bar__nav app-bar__nav--desktop" aria-label="Main">
+      @for (link of links(); track link.path) {
+        <a matButton [routerLink]="link.path" routerLinkActive="is-active">{{ link.label }}</a>
+      }
+    </nav>
+
+    <button
+      matIconButton
+      type="button"
+      class="app-bar__menu-toggle"
+      [matMenuTriggerFor]="mobileNav"
+      [attr.aria-expanded]="mobileNavOpen()"
+      aria-label="Open navigation menu"
+      (menuOpened)="mobileNavOpen.set(true)"
+      (menuClosed)="mobileNavOpen.set(false)">
+      <mat-icon aria-hidden="true">menu</mat-icon>
+    </button>
+
+    <mat-menu #mobileNav="matMenu" class="app-bar__mobile-menu">
+      @for (link of links(); track link.path) {
+        <a mat-menu-item [routerLink]="link.path" routerLinkActive="is-active">{{ link.label }}</a>
+      }
+    </mat-menu>
+
+    <span class="app-bar__spacer"></span>
+
+    <button
+      matButton
+      type="button"
+      [matMenuTriggerFor]="accountMenu"
+      class="app-bar__account"
+      [attr.aria-label]="'Account menu for ' + (auth.user()?.fullName ?? 'signed-in user')">
+      <span class="app-bar__initials" aria-hidden="true">{{ initials() }}</span>
+      <span class="app-bar__account-name">{{ auth.user()?.fullName }}</span>
+      <mat-icon aria-hidden="true">expand_more</mat-icon>
+    </button>
+
+    <mat-menu #accountMenu="matMenu">
+      <div class="account-menu__header" role="presentation">
+        <p class="account-menu__name">{{ auth.user()?.fullName }}</p>
+        <p class="account-menu__email">{{ auth.user()?.email }}</p>
+        <p class="account-menu__roles">{{ auth.roles().join(' · ') }}</p>
+      </div>
+      <button mat-menu-item type="button" (click)="logout()">
+        <mat-icon aria-hidden="true">logout</mat-icon>
+        <span>Sign out</span>
+      </button>
+    </mat-menu>
+  </mat-toolbar>
+}
+
+<main id="main-content" class="app-content" [class.app-content--bare]="!auth.isAuthenticated()" tabindex="-1">
+  <router-outlet />
+</main>

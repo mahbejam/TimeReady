@@ -1,0 +1,148 @@
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -3rem;
+  z-index: 100;
+  padding: 0.5rem 0.75rem;
+  background: #fff;
+  border: 1px solid var(--tr-border);
+  border-radius: 0.35rem;
+  color: var(--tr-ink);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+.app-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  gap: 1rem;
+  background: #fff;
+  border-bottom: 1px solid var(--tr-border);
+}
+
+.app-bar__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.app-bar__nav {
+  display: flex;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.app-bar__nav .is-active,
+.app-bar__mobile-menu .is-active {
+  font-weight: 600;
+  color: var(--mat-sys-primary, #1565c0);
+}
+
+.app-bar__menu-toggle {
+  display: none;
+}
+
+.app-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.75rem 1rem 3rem;
+}
+
+.app-bar__spacer {
+  flex: 1 1 auto;
+}
+
+.app-bar__account {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.app-bar__initials {
+  display: inline-grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: rgba(21, 101, 192, 0.12);
+  color: #1565c0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  flex: 0 0 auto;
+}
+
+.account-menu__header {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--tr-border);
+}
+
+.account-menu__header p {
+  margin: 0;
+}
+
+.account-menu__name {
+  font-weight: 600;
+  color: var(--tr-ink);
+}
+
+.account-menu__email,
+.account-menu__roles {
+  font-size: 0.82rem;
+  color: var(--tr-muted);
+}
+
+.app-content--bare {
+  max-width: none;
+  padding: 0;
+}
+
+@media (max-width: 839px) {
+  .app-bar__nav--desktop {
+    display: none;
+  }
+
+  .app-bar__menu-toggle {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 719px) {
+  .app-bar {
+    gap: 0.5rem;
+    padding-inline: 0.5rem;
+  }
+
+  .app-bar__account-name {
+    display: none;
+  }
+
+  .app-content {
+    padding-top: 1.25rem;
+  }
+}
+
+@media (max-width: 399px) {
+  .app-bar__brand span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}

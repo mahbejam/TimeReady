@@ -1,0 +1,45 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Logs
+logs/
+*.log
+
+# Test / coverage output
+TestResults/
+coverage/
+*.trx
+*.coverage
+*.coveragexml
+
+# EF Core / SQLite
+*.db
+*.db-shm
+*.db-wal
+
+# Node / Angular
+node_modules/
+dist/
+.angular/
+out-tsc/
+npm-debug.log*
+
+# Editors
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+
+# Environment
+*.local
+.env
+.env.*
+!.env.example
+
+# OS
+Thumbs.db
+Desktop.ini

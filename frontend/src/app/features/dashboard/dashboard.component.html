@@ -1,0 +1,110 @@
+<header class="page-header">
+  <div>
+    <h1 class="page-header__title">Team overview</h1>
+    <p class="page-header__subtitle">Who is prepared to leave, and what is still open.</p>
+  </div>
+
+  <button
+    matButton="outlined"
+    type="button"
+    (click)="refresh()"
+    [disabled]="store.loading()"
+    [attr.aria-busy]="store.loading()">
+    @if (store.loading() && store.loaded()) {
+      <mat-spinner diameter="18" aria-hidden="true" />
+      Updating…
+    } @else {
+      <mat-icon aria-hidden="true">refresh</mat-icon>
+      Refresh
+    }
+  </button>
+</header>
+
+@if (store.loading() && store.loaded()) {
+  <mat-progress-bar mode="indeterminate" aria-label="Updating the team overview" />
+}
+
+<tr-data-state
+  [loading]="store.loading() && !store.loaded()"
+  [error]="store.error()"
+  [empty]="store.loaded() && store.rows().length === 0"
+  loadingText="Loading the team overview…"
+  emptyText="No employees yet. Add the first one to start checking readiness."
+  (retry)="refresh()">
+
+  <a emptyAction matButton="outlined" routerLink="/employees">Go to employees</a>
+
+  <div class="grid">
+    <section class="grid__score">
+      <h2 class="section-title">Readiness</h2>
+      <tr-readiness-score-card
+        [score]="store.summary().readinessScore"
+        [ready]="store.summary().ready"
+        [notReady]="store.summary().notReady"
+        [total]="store.summary().total"
+        [openCritical]="store.summary().openCritical" />
+    </section>
+
+    <section class="grid__attention">
+      <h2 class="section-title">Needs attention</h2>
+
+      <mat-card appearance="outlined">
+        <mat-card-content>
+          @if (store.needsAttention().length === 0) {
+            <p class="muted">Nothing is blocking anyone right now.</p>
+          } @else {
+            <ul class="attention">
+              @for (row of store.needsAttention(); track row.id) {
+                <li class="attention__item">
+                  <div class="attention__head">
+                    <span class="attention__name">{{ row.fullName }}</span>
+                    <tr-status-badge [label]="row.status" tone="not-ready" />
+                  </div>
+                  <p class="attention__meta">{{ row.vacationStartDate | vacationDate }}</p>
+                  <ul class="attention__reasons">
+                    @for (warning of row.warnings; track warning.code) {
+                      @if (warning.severity === 'Critical') {
+                        <li>{{ warning.message }}</li>
+                      }
+                    }
+                  </ul>
+                </li>
+              }
+            </ul>
+          }
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <section class="grid__upcoming">
+      <h2 class="section-title">Next departures</h2>
+
+      <mat-card appearance="outlined">
+        <mat-card-content>
+          @if (store.upcomingDepartures().length === 0) {
+            <p class="muted">No vacations are planned.</p>
+          } @else {
+            <ul class="departures">
+              @for (row of store.upcomingDepartures(); track row.id) {
+                <li class="departures__item">
+                  <div>
+                    <span class="departures__name">{{ row.fullName }}</span>
+                    <span class="departures__date">{{ row.vacationStartDate | vacationDate }}</span>
+                  </div>
+                  <tr-status-badge
+                    [label]="row.status"
+                    [tone]="row.isReady ? 'ready' : 'not-ready'" />
+                </li>
+              }
+            </ul>
+          }
+        </mat-card-content>
+      </mat-card>
+    </section>
+  </div>
+
+  <p class="footnote">
+    Readiness is decided by a rule engine on the server – fixed thresholds, no prediction.
+    <a routerLink="/notifications">See all findings</a>.
+  </p>
+</tr-data-state>

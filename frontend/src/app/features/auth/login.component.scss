@@ -1,0 +1,81 @@
+.login {
+  min-height: calc(100vh - 4rem);
+  display: grid;
+  place-items: center;
+  padding: 2rem 1rem;
+}
+
+.login__card {
+  width: min(26rem, 100%);
+  overflow: hidden;
+}
+
+.login__header {
+  margin-bottom: 1.5rem;
+}
+
+.login__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  color: var(--tr-muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.login__title {
+  margin: 0.75rem 0 0.25rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--tr-ink);
+}
+
+.login__subtitle {
+  margin: 0;
+  color: var(--tr-muted);
+  font-size: 0.92rem;
+}
+
+.login__form {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.login__submit {
+  margin-top: 0.5rem;
+  width: 100%;
+}
+
+.login__error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.5rem;
+  color: var(--tr-critical);
+  font-size: 0.9rem;
+}
+
+.login__demo {
+  margin-top: 1.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--tr-border);
+  color: var(--tr-muted);
+  font-size: 0.82rem;
+}
+
+.login__demo p {
+  margin: 0 0 0.3rem;
+}
+
+.login__demo-title {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.login__demo code {
+  font-size: 0.8rem;
+}

@@ -1,0 +1,87 @@
+.page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.page-header__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1c1f24;
+}
+
+.page-header__subtitle {
+  margin: 0.25rem 0 0;
+  color: #5b6470;
+  font-size: 0.92rem;
+}
+
+.search {
+  width: min(20rem, 100%);
+  margin-bottom: 1rem;
+}
+
+.refresh-bar {
+  margin-bottom: 0.75rem;
+}
+
+.table-scroll {
+  overflow-x: auto;
+}
+
+.employee-table {
+  width: 100%;
+  min-width: 46rem;
+  background: transparent;
+}
+
+.employee-table__name {
+  font-weight: 500;
+}
+
+.is-numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.is-actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.is-negative {
+  color: var(--tr-critical);
+  font-weight: 600;
+}
+
+/* A quiet rail marks rows with something blocking. */
+tr.is-blocked td:first-child {
+  box-shadow: inset 3px 0 0 var(--tr-critical);
+}
+
+.flags {
+  display: flex;
+  gap: 0.9rem;
+}
+
+.flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.82rem;
+  color: #5b6470;
+}
+
+.flag mat-icon {
+  font-size: 1.05rem;
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.flag--done {
+  color: var(--tr-ok);
+}
