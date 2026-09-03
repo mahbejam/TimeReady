@@ -6,8 +6,7 @@ using Xunit;
 
 namespace TimeReady.Tests.Integration;
 
-[Collection("Integration")]
-public class ReadinessEndpointsTests(TimeReadyApiFactory factory) : IAsyncLifetime
+public class ReadinessEndpointsTests(TimeReadyApiFactory factory) : IClassFixture<TimeReadyApiFactory>, IAsyncLifetime
 {
     private HttpClient _client = null!;
 

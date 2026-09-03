@@ -7,8 +7,7 @@ using Xunit;
 
 namespace TimeReady.Tests.Integration;
 
-[Collection("Integration")]
-public class AuthEndpointsTests(TimeReadyApiFactory factory)
+public class AuthEndpointsTests(TimeReadyApiFactory factory) : IClassFixture<TimeReadyApiFactory>
 {
     private readonly HttpClient _client = factory.CreateClient();
 

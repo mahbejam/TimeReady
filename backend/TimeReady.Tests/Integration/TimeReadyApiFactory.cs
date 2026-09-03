@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using Serilog;
 using TimeReady.Api.Data;
 using TimeReady.Api.Dtos.Auth;
 
@@ -53,6 +54,10 @@ public class TimeReadyApiFactory : WebApplicationFactory<Program>
     /// <inheritdoc />
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        // Each integration test class gets its own host. Reset Serilog's static
+        // logger so a previous fixture does not leave it in a frozen state.
+        Log.CloseAndFlush();
+
         builder.UseEnvironment("Development");
 
         builder.ConfigureAppConfiguration((_, configuration) =>
