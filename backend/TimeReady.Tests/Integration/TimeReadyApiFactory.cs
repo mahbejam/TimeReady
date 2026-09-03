@@ -1,14 +1,17 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Serilog;
+using TimeReady.Api.Authorization;
 using TimeReady.Api.Data;
 using TimeReady.Api.Dtos.Auth;
+using TimeReady.Api.Models.Identity;
 
 namespace TimeReady.Tests.Integration;
 
@@ -58,6 +61,8 @@ public class TimeReadyApiFactory : WebApplicationFactory<Program>
         // logger so a previous fixture does not leave it in a frozen state.
         Log.CloseAndFlush();
 
+        // IdentitySeeder only creates the operator account outside Production.
+        // Integration tests always need that role, so stay on Development.
         builder.UseEnvironment("Development");
 
         builder.ConfigureAppConfiguration((_, configuration) =>
@@ -103,8 +108,52 @@ public class TimeReadyApiFactory : WebApplicationFactory<Program>
     public Task<HttpClient> CreateAdminClientAsync() => CreateAuthenticatedClientAsync(AdminEmail, AdminPassword);
 
     /// <summary>A client that sends the operator's bearer token.</summary>
-    public Task<HttpClient> CreateOperatorClientAsync() =>
-        CreateAuthenticatedClientAsync(OperatorEmail, OperatorPassword);
+    public async Task<HttpClient> CreateOperatorClientAsync()
+    {
+        await EnsureOperatorAccountExistsAsync();
+
+        return await CreateAuthenticatedClientAsync(OperatorEmail, OperatorPassword);
+    }
+
+    /// <summary>
+    /// Creates the operator account when startup seeding skipped it. That happens
+    /// whenever the host runs as Production, even though the test configuration
+    /// supplies operator credentials.
+    /// </summary>
+    private async Task EnsureOperatorAccountExistsAsync()
+    {
+        using var scope = Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+        if (await userManager.FindByEmailAsync(OperatorEmail) is not null)
+        {
+            return;
+        }
+
+        if (!await roleManager.RoleExistsAsync(Roles.Operator))
+        {
+            await roleManager.CreateAsync(new IdentityRole(Roles.Operator));
+        }
+
+        var user = new ApplicationUser
+        {
+            UserName = OperatorEmail,
+            Email = OperatorEmail,
+            EmailConfirmed = true,
+            FullName = "Test Operator"
+        };
+
+        var result = await userManager.CreateAsync(user, OperatorPassword);
+
+        if (!result.Succeeded)
+        {
+            var errors = string.Join("; ", result.Errors.Select(error => error.Description));
+            throw new InvalidOperationException($"Could not create the operator test account: {errors}");
+        }
+
+        await userManager.AddToRoleAsync(user, Roles.Operator);
+    }
 
     private async Task<HttpClient> CreateAuthenticatedClientAsync(string email, string password)
     {
